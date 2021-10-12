@@ -12,7 +12,7 @@ class OrderController extends Controller
     {
         $this->middleware('auth:api');
     }
-    
+
     /**
      * index
      *
@@ -25,11 +25,11 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'List Invoices: '.auth()->guard('api')->user()->name,
-            'data'    => $invoices  
+            'data'    => $invoices
         ], 200);
 
     }
-    
+
     /**
      * show
      *
@@ -43,8 +43,8 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Detail Invoices: '.auth()->guard('api')->user()->name,
-            'data'    => $invoice, 
-            'product' => $invoice->orders 
+            'data'    => $invoice,
+            'product' => $invoice->orders
         ], 200);
 
     }

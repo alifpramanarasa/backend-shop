@@ -40,6 +40,8 @@ Route::get('/cart/total', [CartController::class, 'getCartTotal'])->name('custom
 Route::get('/cart/totalWeight', [CartController::class, 'getCartTotalWeight'])->name('customer.cart.getCartTotalWeight');
 Route::post('/cart/remove', [CartController::class, 'removeCart'])->name('customer.cart.remove');
 Route::post('/cart/removeAll', [CartController::class, 'removeAllCart'])->name('customer.cart.removeAll');
+Route::post('/cart/plus', [CartController::class, 'plus'])->name('customer.cart.plus');
+Route::post('/cart/minus', [CartController::class, 'minus'])->name('customer.cart.minus');
 
 /**
  * Route Raja Ongkir

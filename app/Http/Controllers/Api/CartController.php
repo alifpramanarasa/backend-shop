@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class CartController extends Controller
-{       
+{
     /**
      * __construct
      *
@@ -16,7 +16,7 @@ class CartController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api');
-    } 
+    }
 
     /**
      * index
@@ -29,14 +29,14 @@ class CartController extends Controller
                 ->where('customer_id', auth()->user()->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'List Data Cart',
             'cart'    => $carts
         ]);
     }
-    
+
     /**
      * store
      *
@@ -76,7 +76,7 @@ class CartController extends Controller
             'product'   => $item->product
         ]);
     }
-    
+
     /**
      * getCartTotal
      *
@@ -88,14 +88,14 @@ class CartController extends Controller
                 ->where('customer_id', auth()->user()->id)
                 ->orderBy('created_at', 'desc')
                 ->sum('price');
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Total Cart Price ',
             'total'   => $carts
         ]);
     }
-    
+
     /**
      * getCartTotalWeight
      *
@@ -107,14 +107,14 @@ class CartController extends Controller
                 ->where('customer_id', auth()->user()->id)
                 ->orderBy('created_at', 'desc')
                 ->sum('weight');
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Total Cart Weight ',
             'total'   => $carts
         ]);
     }
-    
+
     /**
      * removeCart
      *
@@ -126,13 +126,13 @@ class CartController extends Controller
         Cart::with('product')
                 ->whereId($request->cart_id)
                 ->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Remove Item Cart',
         ]);
     }
-    
+
     /**
      * removeAllCart
      *
@@ -144,10 +144,59 @@ class CartController extends Controller
         Cart::with('product')
                 ->where('customer_id', auth()->guard('api')->user()->id)
                 ->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Remove All Item in Cart',
         ]);
+    }
+
+    public function plus(Request $request){
+
+        $cart_data = Cart::whereId($request->cart_id)->first();
+        $product = Product::whereId($cart_data->product_id)->first();
+
+        if($cart_data->quantity + $request['quantity'] > $product->qty){
+            return response()->code(400)->json([
+                'success' => false,
+                'message' => 'Stock not available',
+            ]);
+        }
+
+        Cart::whereId($request->cart_id)->update([
+            'quantity'  => $cart_data->quantity + 1,
+            'price'     => $cart_data->price + $product['price'],
+            'weight'    => $cart_data->weight + $product['weight'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success Add To Cart',
+        ]);
+
+    }
+
+    public function minus(Request $request){
+
+        $cart_data = Cart::whereId($request->cart_id)->first();
+        $product = Product::whereId($cart_data->product_id)->first();
+
+        if(($cart_data->quantity - $request['quantity']) <= 0){
+            Cart::with('product')
+            ->whereId($request->cart_id)
+            ->delete();
+        } else {
+            Cart::whereId($request->cart_id)->update([
+                'quantity'  => $cart_data->quantity - 1,
+                'price'     => $cart_data->price - $product['price'],
+                'weight'    => $cart_data->weight - $product['weight'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success Substract From Cart',
+        ]);
+
     }
 }
